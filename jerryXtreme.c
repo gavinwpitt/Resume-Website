@@ -28,12 +28,23 @@ void printJerry(int y, int x, int stoke){
 		mvprintw(y-2,x," /| |\\  ");
 	}else{
 		if(stoke > 0){
-			mvprintw(y-4,x,"'Sick!'     ");
-			mvprintw(y-3,x," \\(+)    ");
-			mvprintw(y-2,x,"  | |\\  ");
-		}else{
+			if(stoke == 1){
+				mvprintw(y-4,x,"'Sick!'     ");
+				mvprintw(y-3,x," \\(+)    ");
+				mvprintw(y-2,x,"  | |\\  ");
+			}
+			if(stoke == 2){
+				mvprintw(y-5,x,"   _     ");
+				mvprintw(y-4,x,"  (_)/   ");
+				mvprintw(y-3,x," /| | ,  ");
+				mvprintw(y-2,x,"  |_|_/  ");
+				mvprintw(y-1,x,"    \\/  ");
+				mvprintw(y  ,x,"    /    ");
+				return;
+			}
+		}else{					
 			mvprintw(y-4,x,"'BOGUS!'     ");
-			mvprintw(y-3,x," \\(-)/    ");
+			mvprintw(y-3,x,"\\(--)/    ");
 			mvprintw(y-2,x,"  | |  ");
 		}
 	}
@@ -52,16 +63,27 @@ void printFloor(int y, int x){
 /**
 Print a rail for Jerry to grind on!
 Looks like this:
-______
+======
  |  |
 ^(y,x)
 
 */
 void printRail(int y, int x){
-	mvprintw(y-1,x,"_______");
+	mvprintw(y-1,x,"=======");
 	mvprintw(y  ,x," |   | ");
 }
 
+/**
+  /
+ /|
+//|
+#####
+*/
+void printRamp(int y, int x){
+	mvprintw(y-2,x,"  /");
+	mvprintw(y-1,x," /|");
+	mvprintw(y-0,x,"/_|");
+}
 /**
 main()
 Initialize all values.
@@ -91,6 +113,9 @@ int main(){
 	cbreak();
 	nodelay(stdscr, TRUE);
 	curs_set(FALSE); //leave cursor visible
+	getmaxyx(stdscr, max_y, max_x);
+	jerryY = max_y - 2;
+	jerryX = max_x / 8;
 
 	while(1){
 		getmaxyx(stdscr, max_y, max_x);
@@ -101,6 +126,9 @@ int main(){
 		if(railX < 0){
 			railX = max_x - 8;
 		}
+		if(jerryY != topOfSnow && stoke != 2){
+			jerryY ++;
+		}
 
 		//jumpTimer will be set to 6 when spacebar is pressed
 		if(jumpTimer > 0){
@@ -109,14 +137,25 @@ int main(){
 			stoke = 1;
 			//stop user from being able to spam jumps
 			if(jumpTimer == 0){
+				stoke = 0;
 				jumpDelay = -HANGTIMEANDRECOVERY;
 			}
 		}else{
-			if(mvinch(jerryY + 1,jerryX) == '_' || mvinch(jerryY + 1,boardTip) == '_' || mvinch(jerryY + 1,jerryCenter) == '_'){
+			if(mvinch(jerryY + 1,jerryX) == '=' || mvinch(jerryY + 1,boardTip) == '=' || mvinch(jerryY + 1,jerryCenter) == '='){
 				stoke = 1;
 				jerryY = topOfSnow - 2;
 			}else{
-				jerryY = topOfSnow;
+				if(mvinch(jerryY,boardTip) == '/'){
+					stoke = 2;
+				}
+				if(stoke == 2){
+					jerryY --;
+					if(mvinch(topOfSnow,jerryCenter - 2) == '|'){
+						stoke = 0;
+					}
+				}else{
+					stoke = 0;
+				}			
 			}		
 		}
 		
@@ -133,20 +172,33 @@ int main(){
 		//PrintStuff
 		clear(); //Clear Screen
 		printFloor(topOfSnow + 1, max_x);
-		printRail(topOfSnow, railX);
-		mvprintw(0,i,"0");
+		//printRail(topOfSnow, railX);
+		printRamp(topOfSnow,railX);
+
 		//Print jerry
-		printJerry(jerryY, jerryX, stoke); //print vall at current position 
-		//Check for collision
-		if(boardTip == railX && jerryY == topOfSnow){
+		//printJerry(jerryY, jerryX, stoke); //print vall at current position 
+		
+		//Check for collisions
+
+		//RAIL
+		if(boardTip == 100 && jerryY == topOfSnow){
 			mvprintw(jerryY - 6, jerryX, "YOU SUCK!");
-			printJerry(jerryY, jerryX, -1);
+			printJerry(jerryY, jerryX +1, -1);
 			refresh();
 			railX = max_x - 8;
 			jerryY = topOfSnow;
 			nodelay(stdscr, FALSE);
 			getch();
 			nodelay(stdscr, TRUE);			
+		}
+
+		//RAMP
+		if(mvinch(jerryY,boardTip) == '/'){
+			stoke = 2;
+			printJerry(jerryY ,jerryX, stoke);
+		}else{
+			//if(railX - jerryX >
+			printJerry(jerryY,jerryX,stoke);
 		}
 		refresh();	
 		
@@ -157,7 +209,7 @@ int main(){
 		if(jumpDelay < 0){
 			jumpDelay ++;
 		}
-		stoke = 0;	
+		//stoke = 0;	
 		
 		usleep(DELAY);
 			
