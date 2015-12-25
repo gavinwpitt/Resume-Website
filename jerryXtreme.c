@@ -18,9 +18,10 @@ Jerry looks like:
 
 @param y, an int that gives y coordinate of where to p rint Jerry
 @param x, an int that gives x coordinate of where to print Jerry
-Returns coordinates of the tip of Jerry's Board
+@param stoke, measure Jerry's stoke level, and print him to represent as much.
+Returns nothing
 */
-int printJerry(int y, int x, int stoke){
+void printJerry(int y, int x, int stoke){
 	if(stoke == 0){
 		mvprintw(y-4,x,"   _     ");
 		mvprintw(y-3,x,"  (_)    ");
@@ -51,23 +52,28 @@ void printFloor(int y, int x){
 /**
 Print a rail for Jerry to grind on!
 Looks like this:
-    _
-   (_)  			
-  /| |\                         
-   |_|       
- __/_\__,
-
+______
  |  |
 ^(y,x)
 
-
 */
-
 void printRail(int y, int x){
 	mvprintw(y-1,x,"_______");
 	mvprintw(y  ,x," |   | ");
 }
 
+/**
+main()
+Initialize all values.
+Run while loop that
+	continualy checks for maximum x and y values of windows
+	adjust variables depending on max x and y
+	print the ground, and print Jerry
+	check if user would like jerry to jump
+	spawn rails for jerry to grind on
+	check if jerry jumped onto rail, or if he crashed into it
+	if he crashes into it, reset game
+*/
 int main(){
 	int jerryY = 0, jerryX, jerryCenter, railX = 0;
 	int max_y = 0, max_x = 0;
