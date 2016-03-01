@@ -1,3 +1,5 @@
+#define _BSD_SOURCE
+
 #include <ncurses.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -34,12 +36,21 @@ void printJerry(int y, int x, int stoke){
 				mvprintw(y-2,x,"  | |\\  ");
 			}
 			if(stoke == 2){
-				mvprintw(y-5,x,"   _     ");
-				mvprintw(y-4,x,"  (_)/   ");
-				mvprintw(y-3,x," /| | ,  ");
-				mvprintw(y-2,x,"  |_|_/  ");
-				mvprintw(y-1,x,"    \\/  ");
-				mvprintw(y  ,x,"    /    ");
+				mvprintw(y-5,x,"     _     ");
+				mvprintw(y-4,x,"    (_)/   ");
+				mvprintw(y-3,x,"   /| | ,  ");
+				mvprintw(y-2,x,"    |_|_/  ");
+				mvprintw(y-1,x,"      \\/  ");
+				mvprintw(y  ,x,"      /    ");
+				return;
+			}
+			if(stoke == 3){
+				mvprintw(y-5,x,"     _     ");
+				mvprintw(y-4,x,"   \\(_)   ");
+				mvprintw(y-3,x,"    | |\\,  ");
+				mvprintw(y-2,x,"  \\/|_|    ");
+				mvprintw(y-1,x,"   \\/      ");
+				mvprintw(y  ,x,"    \\,     ");		
 				return;
 			}
 		}else{					
@@ -51,7 +62,7 @@ void printJerry(int y, int x, int stoke){
 	mvprintw(y-1,x,"  |_|    ");
 	mvprintw(y  ,x,"__/_\\__,");
 	//x value infront of tip of Jerry's Board
-	return x + 8;
+	return;
 }
 
 void printFloor(int y, int x){
@@ -153,8 +164,6 @@ int main(){
 					if(mvinch(topOfSnow,jerryCenter - 2) == '|'){
 						stoke = 0;
 					}
-				}else{
-					stoke = 0;
 				}			
 			}		
 		}
@@ -162,7 +171,7 @@ int main(){
 		//get User Input
 		input = getch();
 		//Handle SpaceBar Jump
-		if(input == ' ' && jumpTimer == 0 && jumpDelay == 0){
+		if(input == ' ' && jerryY == topOfSnow && jumpDelay == 0){
 			jumpTimer = HANGTIMEANDRECOVERY;
 			//Handle Jump this iteration
 			jerryY = topOfSnow - 2;
@@ -193,9 +202,9 @@ int main(){
 		}
 
 		//RAMP
-		if(mvinch(jerryY,boardTip) == '/'){
+		if(mvinch(jerryY,jerryCenter) == '_'){
 			stoke = 2;
-			printJerry(jerryY ,jerryX, stoke);
+			//printJerry(jerryY ,jerryX, stoke);
 		}else{
 			//if(railX - jerryX >
 			printJerry(jerryY,jerryX,stoke);
@@ -209,7 +218,10 @@ int main(){
 		if(jumpDelay < 0){
 			jumpDelay ++;
 		}
-		//stoke = 0;	
+
+		if(jerryY == topOfSnow){
+			stoke = 0;	
+		}
 		
 		usleep(DELAY);
 			
